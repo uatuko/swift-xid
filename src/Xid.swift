@@ -7,7 +7,7 @@ import UIKit
 #endif
 
 public struct Xid {
-	private let counter = ManagedAtomic<UInt32>(0)
+	private let counter = ManagedAtomic<Int32>(0)
 	private var _mid: Data?
 	private var _pid: Data?
 
@@ -99,14 +99,14 @@ public struct Xid {
 		return data
 	}
 
-	func random() -> UInt32 {
-		var i: UInt32 = 0
+	func random() -> Int32 {
+		var i: Int32 = 0
 		let status = withUnsafeMutableBytes(of: &i) { ptr in
 			SecRandomCopyBytes(kSecRandomDefault, ptr.count, ptr.baseAddress!)
 		}
 
 		if status != errSecSuccess {
-			i = UInt32.random(in: UInt32.min...UInt32.max)
+			i = Int32.random(in: Int32.min...Int32.max)
 		}
 
 		return i
