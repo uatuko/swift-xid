@@ -10,7 +10,7 @@ public struct Id: CustomStringConvertible {
 			return ""
 		}
 
-		// base32 encoding
+		// base32hex encoding
 		var chars = Data(repeating: 0x00, count: 20)
 		chars[19] = alphabet[Data.Index((bytes[11] << 4) & 0x1f)]
 		chars[18] = alphabet[Data.Index((bytes[11] >> 1) & 0x1f)]
