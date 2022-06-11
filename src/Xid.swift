@@ -81,12 +81,8 @@ public struct Xid {
 #endif
 #endif
 
-		var mid = Data()
-		withUnsafeBytes(of: ptr.pointee) { bytes in
-			let digest = Insecure.MD5.hash(data: bytes)
-			digest.withUnsafeBytes { bytes in
-				mid = Data(bytes)
-			}
+		let mid: Data = withUnsafeBytes(of: ptr.pointee) { bytes in
+			Data(Insecure.MD5.hash(data: bytes))
 		}
 
 		return mid
