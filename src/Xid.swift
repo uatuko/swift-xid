@@ -40,10 +40,10 @@ public struct Xid {
 
 		// Timestamp, 4 bytes (big endian)
 		let ts = timestamp()
-		bytes[0] = ts[3]
-		bytes[1] = ts[2]
-		bytes[2] = ts[1]
-		bytes[3] = ts[0]
+		bytes[0] = ts[0]
+		bytes[1] = ts[1]
+		bytes[2] = ts[2]
+		bytes[3] = ts[3]
 
 		// Machine ID, 3 bytes
 		bytes[4] = mid[0]
@@ -51,8 +51,8 @@ public struct Xid {
 		bytes[6] = mid[2]
 
 		// Process ID, 2 bytes (specs don't specify endianness, use big endian)
-		bytes[7] = pid[1]
-		bytes[8] = pid[0]
+		bytes[7] = pid[0]
+		bytes[8] = pid[1]
 
 		// Increment, 3 bytes (big endian)
 		let i = counter.wrappingIncrementThenLoad(ordering: .relaxed)
@@ -93,12 +93,10 @@ public struct Xid {
 	}
 
 	func processId() -> Data {
-		var pid = Data()
-		withUnsafeBytes(of: getpid()) { bytes in
-			pid = Data(bytes)
-		}
+		var pid = UInt16(getpid()).bigEndian
+		let data = Data(bytes: &pid, count: MemoryLayout.size(ofValue: pid))
 
-		return pid
+		return data
 	}
 
 	func random() -> UInt32 {
@@ -115,10 +113,8 @@ public struct Xid {
 	}
 
 	func timestamp() -> Data {
-		var data = Data()
-		withUnsafeBytes(of: Date().timeIntervalSince1970) { bytes in
-			data = Data(bytes)
-		}
+		var n = UInt32(Date().timeIntervalSince1970).bigEndian
+		let data = Data(bytes: &n, count: MemoryLayout.size(ofValue: n))
 
 		return data
 	}
