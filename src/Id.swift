@@ -39,4 +39,39 @@ public struct Id: CustomStringConvertible {
 
 		return ""
 	}
+
+	public func counter() -> Int32 {
+		return Int32(
+			UInt32(bytes[9]) << 16 | UInt32(bytes[10]) << 8 | UInt32(bytes[11])
+		)
+	}
+
+	public func machineId() -> Data {
+		return Data(bytes[4...6])
+	}
+
+	public func pid() -> UInt16 {
+		let pid: UInt16 = withUnsafeBytes(of: Data(bytes[7...8])) { ptr in
+			let n = ptr.load(as: UInt16.self)
+			return UInt16(bigEndian: n)
+		}
+
+		return pid
+	}
+
+	public func time() -> Date {
+		let t: Date = withUnsafeBytes(of: Data(bytes[0...3])) { ptr in
+			let n = ptr.load(as: UInt32.self)
+			return Date(timeIntervalSince1970: TimeInterval(UInt32(bigEndian: n)))
+		}
+
+		return t
+	}
+}
+
+
+extension Id: Equatable {
+	public static func == (lhs: Id, rhs: Id) -> Bool {
+		lhs.bytes == rhs.bytes
+	}
 }
