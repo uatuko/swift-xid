@@ -5,6 +5,10 @@ public struct Id: CustomStringConvertible {
 
 	var bytes: Data
 
+	public var data: Data {
+		get { return bytes }
+	}
+
 	public var description: String {
 		if bytes.count != 12 {
 			return ""
