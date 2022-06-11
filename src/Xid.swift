@@ -89,10 +89,11 @@ public struct Xid {
 	}
 
 	func processId() -> Data {
-		var pid = UInt16(getpid()).bigEndian
+		var pid = Int32(getpid()).bigEndian
 		let data = Data(bytes: &pid, count: MemoryLayout.size(ofValue: pid))
 
-		return data
+		// Can't really fit a 4 byte `pid_t` into 2 bytes, ignore the most significant bytes
+		return Data(data[2...3])
 	}
 
 	func random() -> Int32 {
