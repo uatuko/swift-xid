@@ -8,6 +8,7 @@ A globally unique id generator.
 
 Xid uses MongoDB Object ID algorighm[^1] to generate globally unique ids with base32 serialzation to produce shorter strings.
 
+
 ## Binary representation
 
 ```
@@ -26,6 +27,7 @@ The binary representation of the id is compatible with MongoDB's 12 bytes Object
 The string representation is using base32hex (w/o padding)[^2] for better space efficiency when stored in string form (20 bytes). The hex variant of base32 is used to retain the
 sortable property of the id.
 
+
 ## Features
 
 - Size: 12 bytes (96 bits), smaller than UUID, larger than Twitter Snowflake[^3]
@@ -35,6 +37,7 @@ sortable property of the id.
 - Embedded time with 1 second precision
 - Unicity guaranteed for 16,777,216 (24 bits) unique ids per second and per host/process
 - Lock-free (unlike UUIDv1 and v2)
+
 
 ## Comparison
 
@@ -50,6 +53,35 @@ sortable property of the id.
 [shortuuid]: https://github.com/stochastic-technologies/shortuuid
 [Snowflake]: https://blog.twitter.com/2010/announcing-snowflake
 [MongoID]: https://www.mongodb.com/docs/manual/reference/method/ObjectId/
+
+
+## Usage
+
+```swift
+let id = NewXid()
+print(id)
+// Output: caia5ng890f0tr46f690
+```
+
+```swift
+var xid = Xid()
+print(xid.next())
+// Output: caia5ng890f0tr00hgtg
+```
+
+```swift
+// Get embedded info
+let id = xid.next()
+
+id.time()
+id.machineId()
+id.pid()
+id.counter()
+
+// Access raw bytes
+print(id.data as NSData)
+// Output: {length = 12, bytes = 0x62a4a4a108481e0f9b83781f}
+```
 
 
 [^1]: https://www.mongodb.com/docs/manual/reference/method/ObjectId/
