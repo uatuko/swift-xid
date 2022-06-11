@@ -23,12 +23,12 @@ Xid uses MongoDB Object ID algorighm[^1] to generate globally unique ids with ba
 - 3-byte counter, starting with a random value.
 
 The binary representation of the id is compatible with MongoDB's 12 bytes Object IDs.
-The string representation is using [base32hex (w/o padding)](https://datatracker.ietf.org/doc/html/rfc4648#section-7) for better space efficiency when stored in string form (20 bytes). The hex variant of base32 is used to retain the
+The string representation is using base32hex (w/o padding)[^2] for better space efficiency when stored in string form (20 bytes). The hex variant of base32 is used to retain the
 sortable property of the id.
 
 ## Features
 
-- Size: 12 bytes (96 bits), smaller than UUID, larger than [Twitter Snowflake](https://blog.twitter.com/2010/announcing-snowflake)
+- Size: 12 bytes (96 bits), smaller than UUID, larger than Twitter Snowflake[^3]
 - Base32hex encoded by default (20 chars when transported as printable string, still sortable)
 - Configuration free: there is no need to set a unique machine and/or data center id
 - K-ordered
@@ -53,3 +53,5 @@ sortable property of the id.
 
 
 [^1]: https://www.mongodb.com/docs/manual/reference/method/ObjectId/
+[^2]: https://datatracker.ietf.org/doc/html/rfc4648#section-7
+[^3]: https://blog.twitter.com/2010/announcing-snowflake
