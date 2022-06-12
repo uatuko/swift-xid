@@ -2,6 +2,14 @@ import XCTest
 @testable import xid
 
 final class xidTests: XCTestCase {
+	func testIdDecodable() throws {
+		let data = "\"caia5ng890f0tr00hgtg\"".data(using: .utf8)!
+		let decoder = JSONDecoder()
+		let id = try decoder.decode(Id.self, from: data)
+
+		XCTAssertEqual("caia5ng890f0tr00hgtg", String(describing: id))
+	}
+
 	func testIdEncodable() throws {
 		var xid = Xid()
 		let id = xid.next()
