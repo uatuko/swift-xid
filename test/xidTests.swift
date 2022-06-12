@@ -2,6 +2,18 @@ import XCTest
 @testable import xid
 
 final class xidTests: XCTestCase {
+	func testIdEncodable() throws {
+		var xid = Xid()
+		let id = xid.next()
+
+		let encoder = JSONEncoder()
+		let data = try encoder.encode(id)
+
+		let expected = "\"\(String(describing: id))\""
+		let actual = String(data: data, encoding: .utf8)
+		XCTAssertEqual(expected, actual)
+	}
+
 	func testIdPartsExtraction() {
 		struct Test {
 			var id: Id

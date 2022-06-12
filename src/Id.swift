@@ -74,6 +74,13 @@ public struct Id: CustomStringConvertible {
 }
 
 
+extension Id: Encodable {
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.singleValueContainer()
+		try container.encode(String(describing: self))
+	}
+}
+
 extension Id: Equatable {
 	public static func == (lhs: Id, rhs: Id) -> Bool {
 		lhs.bytes == rhs.bytes
