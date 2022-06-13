@@ -8,28 +8,14 @@ import UIKit
 
 public struct Xid {
 	private let counter = ManagedAtomic<Int32>(0)
-	private var _mid: Data?
-	private var _pid: Data?
 
-	var mid: Data {
-		mutating get {
-			if _mid == nil {
-				_mid = machineId()
-			}
+	private(set) lazy var mid: Data = {
+		machineId()
+	}()
 
-			return _mid!
-		}
-	}
-
-	var pid: Data {
-		mutating get {
-			if _pid == nil {
-				_pid = processId()
-			}
-
-			return _pid!
-		}
-	}
+	private(set) lazy var pid: Data = {
+		processId()
+	}()
 
 	public init() {
 		counter.store(random(), ordering: .relaxed)
