@@ -28,6 +28,8 @@ public struct Xid {
 		processId()
 	}()
 
+	public init() {}
+
 	public mutating func next() -> Id {
 		var bytes = Data(repeating: 0x00, count: 12)
 
