@@ -31,7 +31,7 @@ let package = Package(
 			],
 			path: "src"),
 		.testTarget(
-			name: "xidTests",
+			name: "tests",
 			dependencies: ["xid"],
 			path: "test"),
 	]

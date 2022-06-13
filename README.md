@@ -58,7 +58,7 @@ sortable property of the id.
 ## Usage
 
 ```swift
-let id = NewXid()
+let id: String = NewXid() // or let id: Id = NewXid()
 print(id)
 // Output: caia5ng890f0tr46f690
 ```
@@ -81,6 +81,48 @@ id.counter()
 // Access raw bytes
 print(id.data as NSData)
 // Output: {length = 12, bytes = 0x62a4a4a108481e0f9b83781f}
+```
+
+### Encoding and Decoding
+
+The `Id` structure complies with `Codable` protocol and can be converted into and out of an external representation (e.g. JSON).
+
+#### Decoding from JSON
+
+```swift
+struct User: Decodable {
+  var id: Id
+  var name: String
+}
+
+let data = """
+{
+  "id": "caia5ng890f0tr00hgtg",
+  "name": "Jane Smith"
+}
+""".data(using: .utf8)!
+
+let decoder = JSONDecoder()
+let user = try decoder.decode(User.self, from: data)
+
+print(user.id)
+// Output: caia5ng890f0tr00hgtg
+```
+
+#### Encoding into JSON
+```swift
+struct User: Encodable {
+  var id: Id
+  var name: String
+}
+
+let user = User(id: NewXid(), name: "Jane Smith")
+
+let encoder = JSONEncoder()
+let data = try encoder.encode(user)
+
+print(String(data: data, encoding: .utf8)!)
+// Output: {"id":"caia5ng890f0tr00hgtg","name":"Jane Smith"}
 ```
 
 
