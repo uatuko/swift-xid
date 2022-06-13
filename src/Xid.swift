@@ -7,7 +7,18 @@ import UIKit
 #endif
 
 public struct Xid {
-	private let counter = ManagedAtomic<Int32>(0)
+	private(set) static var counter: ManagedAtomic<Int32> = {
+		var i: Int32 = 0
+		let status = withUnsafeMutableBytes(of: &i) { ptr in
+			SecRandomCopyBytes(kSecRandomDefault, ptr.count, ptr.baseAddress!)
+		}
+
+		if status != errSecSuccess {
+			i = Int32.random(in: Int32.min...Int32.max)
+		}
+
+		return ManagedAtomic<Int32>(i)
+	}()
 
 	private(set) lazy var mid: Data = {
 		machineId()
@@ -16,10 +27,6 @@ public struct Xid {
 	private(set) lazy var pid: Data = {
 		processId()
 	}()
-
-	public init() {
-		counter.store(random(), ordering: .relaxed)
-	}
 
 	public mutating func next() -> Id {
 		var bytes = Data(repeating: 0x00, count: 12)
@@ -41,7 +48,7 @@ public struct Xid {
 		bytes[8] = pid[1]
 
 		// Increment, 3 bytes (big endian)
-		let i = counter.wrappingIncrementThenLoad(ordering: .relaxed)
+		let i = Xid.counter.wrappingIncrementThenLoad(ordering: .relaxed)
 		bytes[9] = UInt8((i & 0xff0000) >> 16)
 		bytes[10] = UInt8((i & 0x00ff00) >> 8)
 		bytes[11] = UInt8(i & 0x0000ff)
@@ -80,19 +87,6 @@ public struct Xid {
 
 		// Can't really fit a 4 byte `pid_t` into 2 bytes, ignore the most significant bytes
 		return Data(data[2...3])
-	}
-
-	func random() -> Int32 {
-		var i: Int32 = 0
-		let status = withUnsafeMutableBytes(of: &i) { ptr in
-			SecRandomCopyBytes(kSecRandomDefault, ptr.count, ptr.baseAddress!)
-		}
-
-		if status != errSecSuccess {
-			i = Int32.random(in: Int32.min...Int32.max)
-		}
-
-		return i
 	}
 
 	func timestamp() -> Data {
