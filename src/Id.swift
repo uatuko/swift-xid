@@ -49,6 +49,51 @@ public struct Id {
 }
 
 
+extension Id {
+	public init(from: Data) throws {
+		if from.count != 20 {
+			throw XidError.invalidId
+		}
+
+		bytes = Data(repeating: 0x00, count: 12)
+		bytes[11] = base32DecodeMap[Data.Index(from[17])] << 6 | base32DecodeMap[Data.Index(from[18])] << 1 | base32DecodeMap[Data.Index(from[19])] >> 4
+		bytes[10] = base32DecodeMap[Data.Index(from[16])] << 3 | base32DecodeMap[Data.Index(from[17])] >> 2
+		bytes[9] = base32DecodeMap[Data.Index(from[14])] << 5 | base32DecodeMap[Data.Index(from[15])]
+		bytes[8] = base32DecodeMap[Data.Index(from[12])] << 7 | base32DecodeMap[Data.Index(from[13])] << 2 | base32DecodeMap[Data.Index(from[14])] >> 3
+		bytes[7] = base32DecodeMap[Data.Index(from[11])] << 4 | base32DecodeMap[Data.Index(from[12])] >> 1
+		bytes[6] = base32DecodeMap[Data.Index(from[9])] << 6 | base32DecodeMap[Data.Index(from[10])] << 1 | base32DecodeMap[Data.Index(from[11])] >> 4
+		bytes[5] = base32DecodeMap[Data.Index(from[8])] << 3 | base32DecodeMap[Data.Index(from[9])] >> 2
+		bytes[4] = base32DecodeMap[Data.Index(from[6])] << 5 | base32DecodeMap[Data.Index(from[7])]
+		bytes[3] = base32DecodeMap[Data.Index(from[4])] << 7 | base32DecodeMap[Data.Index(from[5])] << 2 | base32DecodeMap[Data.Index(from[6])] >> 3
+		bytes[2] = base32DecodeMap[Data.Index(from[3])] << 4 | base32DecodeMap[Data.Index(from[4])] >> 1
+		bytes[1] = base32DecodeMap[Data.Index(from[1])] << 6 | base32DecodeMap[Data.Index(from[2])] << 1 | base32DecodeMap[Data.Index(from[3])] >> 4
+		bytes[0] = base32DecodeMap[Data.Index(from[0])] << 3 | base32DecodeMap[Data.Index(from[1])] >> 2
+
+		// Validate that there are no padding in data that would cause the re-encoded id to not equal data.
+		var check = Data(repeating: 0x00, count: 4)
+		check[3] = base32Alphabet[Data.Index((bytes[11] << 4) & 0x1f)]
+		check[2] = base32Alphabet[Data.Index((bytes[11] >> 1) & 0x1f)]
+		check[1] = base32Alphabet[Data.Index((bytes[11] >> 6) & 0x1f | (bytes[10] << 2) & 0x1f)]
+		check[0] = base32Alphabet[Data.Index(bytes[10] >> 3)]
+
+		if check != from[16...19] {
+			throw XidError.decodeValidationFailure
+		}
+	}
+
+	public init(from: String) throws {
+		if from.count != 20 {
+			throw XidError.invalidIdStringLength(have: from.count, want: 20)
+		}
+
+		guard let data = from.data(using: .utf8) else {
+			throw XidError.invalidId
+		}
+
+		try self.init(from: data)
+	}
+}
+
 extension Id: CustomStringConvertible {
 	public var description: String {
 		if bytes.count != 12 {
@@ -85,36 +130,7 @@ extension Id: CustomStringConvertible {
 extension Id: Decodable {
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
-		let data = try container.decode(String.self).data(using: .utf8) ?? Data()
-
-		if data.count != 20 {
-			throw XidError.invalidIdStringLength(have: data.count, want: 20)
-		}
-
-		bytes = Data(repeating: 0x00, count: 12)
-		bytes[11] = base32DecodeMap[Data.Index(data[17])] << 6 | base32DecodeMap[Data.Index(data[18])] << 1 | base32DecodeMap[Data.Index(data[19])] >> 4
-		bytes[10] = base32DecodeMap[Data.Index(data[16])] << 3 | base32DecodeMap[Data.Index(data[17])] >> 2
-		bytes[9] = base32DecodeMap[Data.Index(data[14])] << 5 | base32DecodeMap[Data.Index(data[15])]
-		bytes[8] = base32DecodeMap[Data.Index(data[12])] << 7 | base32DecodeMap[Data.Index(data[13])] << 2 | base32DecodeMap[Data.Index(data[14])] >> 3
-		bytes[7] = base32DecodeMap[Data.Index(data[11])] << 4 | base32DecodeMap[Data.Index(data[12])] >> 1
-		bytes[6] = base32DecodeMap[Data.Index(data[9])] << 6 | base32DecodeMap[Data.Index(data[10])] << 1 | base32DecodeMap[Data.Index(data[11])] >> 4
-		bytes[5] = base32DecodeMap[Data.Index(data[8])] << 3 | base32DecodeMap[Data.Index(data[9])] >> 2
-		bytes[4] = base32DecodeMap[Data.Index(data[6])] << 5 | base32DecodeMap[Data.Index(data[7])]
-		bytes[3] = base32DecodeMap[Data.Index(data[4])] << 7 | base32DecodeMap[Data.Index(data[5])] << 2 | base32DecodeMap[Data.Index(data[6])] >> 3
-		bytes[2] = base32DecodeMap[Data.Index(data[3])] << 4 | base32DecodeMap[Data.Index(data[4])] >> 1
-		bytes[1] = base32DecodeMap[Data.Index(data[1])] << 6 | base32DecodeMap[Data.Index(data[2])] << 1 | base32DecodeMap[Data.Index(data[3])] >> 4
-		bytes[0] = base32DecodeMap[Data.Index(data[0])] << 3 | base32DecodeMap[Data.Index(data[1])] >> 2
-
-		// Validate that there are no padding in data that would cause the re-encoded id to not equal data.
-		var check = Data(repeating: 0x00, count: 4)
-		check[3] = base32Alphabet[Data.Index((bytes[11] << 4) & 0x1f)]
-		check[2] = base32Alphabet[Data.Index((bytes[11] >> 1) & 0x1f)]
-		check[1] = base32Alphabet[Data.Index((bytes[11] >> 6) & 0x1f | (bytes[10] << 2) & 0x1f)]
-		check[0] = base32Alphabet[Data.Index(bytes[10] >> 3)]
-
-		if check != data[16...19] {
-			throw XidError.decodeValidationFailure
-		}
+		try self.init(from: try container.decode(String.self))
 	}
 }
 
