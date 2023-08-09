@@ -1,6 +1,6 @@
 # Swift Xid
 
-[![license](https://img.shields.io/badge/license-MIT-green)](https://raw.githubusercontent.com/uditha-atukorala/swift-xid/main/LICENSE)
+[![license](https://img.shields.io/badge/license-MIT-green)](https://raw.githubusercontent.com/uatuko/swift-xid/main/LICENSE)
 
 A globally unique id generator.
 
